@@ -11,15 +11,22 @@ const rl = readline.createInterface({
   output: process.stdout
 })
 
+function log (...args) {
+  console.log()
+  console.log(...args)
+}
+
 function addTorrent (uri) {
   socket.emit('add', uri)
 }
 
 function getInput () {
-  rl.question('>>> ', (answer) => {
+  rl.question('>>> ', answer => {
     const args = answer.split(' ')
     if (args[0] === 'add') {
       addTorrent(args[1])
+    } else if (args[0] === 'tail') {
+
     }
 
     getInput()
@@ -27,22 +34,26 @@ function getInput () {
 }
 
 socket.on('connect', () => {
-  console.log(`Connected established on ${uri}`)
+  log(`Connection established to ${uri}`)
   getInput()
 })
 
-socket.on('torrentAdded', (torrent) => {
-  console.log('Torrent added', torrent)
+socket.on('disconnect', () => {
+  log(`Disconnected from ${uri}`)
 })
 
-socket.on('torrentDownload', (torrent) => {
-  console.log('Torrent progress', torrent)
+socket.on('torrentAdded', torrent => {
+  log('New Torrent Added', torrent.magnetUri)
 })
 
-socket.on('torrentDone', (uri) => {
-  console.log('Torrent done', uri)
+socket.on('torrentDownload', torrent => {
+  log(`[${torrent.magnetUri}] ${(torrent.progress * 100).toFixed(2)}%`)
 })
 
-socket.on('torrentMoveError', (err) => {
-  console.log('Torrent move error', err)
+socket.on('torrentDone', uri => {
+  log('Torrent Complete', uri)
+})
+
+socket.on('torrentMoveError', err => {
+  log('Error Moving Torrent', err)
 })

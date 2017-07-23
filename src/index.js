@@ -5,11 +5,14 @@ import path from 'path'
 import socket from 'socket.io'
 import WebTorrent from 'webtorrent'
 
+import scanFeeds from './feeds'
+
 const app = http.createServer()
 const io = socket(app)
-const client = new WebTorrent()
 
 app.listen(config.get('port') || 3000)
+
+const client = new WebTorrent()
 
 client.on('torrent', (torrent) => io.sockets.emit('torrentAdded', {
   infoHash: torrent.infoHash,
@@ -17,7 +20,9 @@ client.on('torrent', (torrent) => io.sockets.emit('torrentAdded', {
   path: torrent.path
 }))
 
-async function addTorrent (socket, uri) {
+scanFeeds()
+
+export async function addTorrent (uri) {
   const torrent = await client.add(uri, {
     path: config.get('paths.downloading')
   })
@@ -56,5 +61,5 @@ async function addTorrent (socket, uri) {
 
 io.on('connection', (socket) => {
   console.log('Connection established!')
-  socket.on('add', (uri) => addTorrent(socket, uri))
+  socket.on('add', (uri) => addTorrent(uri))
 })
