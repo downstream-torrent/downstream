@@ -1,3 +1,3 @@
-# Downstream Daemon
+# Downstream
 
-> Daemon for the Downstream torrent client
+> A useful torrent client

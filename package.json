@@ -1,7 +1,7 @@
 {
-  "name": "downstream-daemon",
+  "name": "downstream-torrent",
   "version": "0.0.0",
-  "description": "Daemon for the Downstream torrent client",
+  "description": "A useful torrent client",
   "main": "src/index.js",
   "scripts": {
     "start": "babel-node ."
