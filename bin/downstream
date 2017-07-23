@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+const config = require('config')
+const readline = require('readline')
+const socket = require('socket.io-client')
+
+const uri = process.argv[2] || `http://localhost:${config.get('port')}`
+const io = socket(uri)
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
+
+function getInput () {
+  rl.question('>>> ', (answer) => {
+    getInput()
+  })
+}
+
+io.on('connect', (socket) => {
+  console.log(`Connected established on ${uri}`)
+  getInput()
+})
