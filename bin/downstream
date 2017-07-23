@@ -42,3 +42,7 @@ socket.on('torrentDownload', (torrent) => {
 socket.on('torrentDone', (uri) => {
   console.log('Torrent done', uri)
 })
+
+socket.on('torrentMoveError', (err) => {
+  console.log('Torrent move error', err)
+})
