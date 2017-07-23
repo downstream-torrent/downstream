@@ -9,13 +9,14 @@ const client = new WebTorrent()
 
 app.listen(config.get('port') || 3000)
 
+client.on('torrent', (torrent) => io.sockets.emit('torrentAdded', {
+  infoHash: torrent.infoHash,
+  magnetUri: torrent.magnetURI,
+  path: torrent.path
+}))
+
 async function addTorrent (socket, uri) {
   const torrent = await client.add(uri)
-  torrent.on('metadata', () => io.sockets.emit('torrentMetadata', {
-    infoHash: torrent.infoHash,
-    magnetUri: torrent.magnetURI,
-    path: torrent.path
-  }))
   torrent.on('download', () => io.sockets.emit('torrentDownload', {
     downloadSpeed: torrent.downloadSpeed,
     infoHash: torrent.infoHash,
