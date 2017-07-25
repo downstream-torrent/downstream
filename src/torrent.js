@@ -48,6 +48,16 @@ export function removeTorrent (torrentId) {
   })
 }
 
+export function pauseTorrent (torrentId) {
+  const torrent = client.get(torrentId)
+  torrent.pause()
+}
+
+export function resumeTorrent (torrentId) {
+  const torrent = client.get(torrentId)
+  torrent.resume()
+}
+
 export function listTorrents (socket) {
   const torrents = client.torrents.map(torrent => ({
     hash: torrent.infoHash,
