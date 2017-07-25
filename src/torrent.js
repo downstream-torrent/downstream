@@ -39,3 +39,22 @@ export async function addTorrent (uri) {
     io.sockets.emit('torrentDone', torrent.magnetURI)
   })
 }
+
+export async function listTorrents (socket) {
+  const torrents = client.torrents.map(torrent => ({
+    hash: torrent.infoHash,
+    magnet: torrent.magnetURI,
+    timeRemaining: torrent.timeRemaining,
+    received: torrent.received,
+    downloaded: torrent.downloaded,
+    uploaded: torrent.downloaded,
+    downloadSpeed: torrent.downloadSpeed,
+    uploadSpeed: torrent.uploadSpeed,
+    progress: torrent.progress,
+    ratio: torrent.ratio,
+    peers: torrent.numPeers,
+    path: torrent.path
+  }))
+
+  socket.emit('list', torrents)
+}

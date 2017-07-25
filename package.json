@@ -9,6 +9,7 @@
   "author": "Brendan Goodenough <brendan@goodenough.nz>",
   "license": "MIT",
   "dependencies": {
+    "bytes": "^2.5.0",
     "config": "^1.26.1",
     "feedparser": "^2.2.1",
     "mv": "^2.1.1",

@@ -4,7 +4,7 @@ import socket from 'socket.io'
 import WebTorrent from 'webtorrent'
 
 import { scanFeeds } from './feeds'
-import { addTorrent } from './torrent'
+import { addTorrent, listTorrents } from './torrent'
 
 export const app = http.createServer()
 export const io = socket(app)
@@ -20,7 +20,8 @@ client.on('torrent', (torrent) => io.sockets.emit('torrentAdded', {
 
 io.on('connection', (socket) => {
   console.log('Connection established!')
-  socket.on('add', (uri) => addTorrent(uri))
+  socket.on('add', uri => addTorrent(uri))
+  socket.on('list', () => listTorrents(socket))
 })
 
 // Scan feeds for new torrents
