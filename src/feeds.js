@@ -2,11 +2,11 @@ import config from 'config'
 import FeedParser from 'feedparser'
 import request from 'request'
 
-import { addTorrent } from './index'
+import { addTorrent } from './torrent'
 
 const feeds = config.get('feeds')
 
-export default function scanFeeds () {
+export function scanFeeds () {
   feeds.forEach(feed => {
     const feedParser = new FeedParser()
 

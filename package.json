@@ -2,7 +2,7 @@
   "name": "downstream-torrent",
   "version": "0.0.0",
   "description": "A useful torrent client",
-  "main": "src/index.js",
+  "main": "src/server.js",
   "scripts": {
     "start": "babel-node ."
   },

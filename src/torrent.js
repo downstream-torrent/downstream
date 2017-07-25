@@ -1,26 +1,7 @@
 import config from 'config'
-import http from 'http'
 import mv from 'mv'
 import path from 'path'
-import socket from 'socket.io'
-import WebTorrent from 'webtorrent'
-
-import scanFeeds from './feeds'
-
-const app = http.createServer()
-const io = socket(app)
-
-app.listen(config.get('port') || 3000)
-
-const client = new WebTorrent()
-
-client.on('torrent', (torrent) => io.sockets.emit('torrentAdded', {
-  infoHash: torrent.infoHash,
-  magnetUri: torrent.magnetURI,
-  path: torrent.path
-}))
-
-scanFeeds()
+import { client, io } from './server'
 
 export async function addTorrent (uri) {
   const torrent = await client.add(uri, {
@@ -48,7 +29,7 @@ export async function addTorrent (uri) {
         const newPath = path.join(completePath, file.path)
         mv(oldPath, newPath, { mkdirp: true }, err => {
           if (err) {
-            socket.emit('torrentMoveError', err.message)
+            io.sockets.emit('torrentMoveError', err.message)
           }
         })
       })
@@ -58,8 +39,3 @@ export async function addTorrent (uri) {
     io.sockets.emit('torrentDone', torrent.magnetURI)
   })
 }
-
-io.on('connection', (socket) => {
-  console.log('Connection established!')
-  socket.on('add', (uri) => addTorrent(uri))
-})
