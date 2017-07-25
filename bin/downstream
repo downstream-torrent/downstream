@@ -22,8 +22,15 @@ function addTorrent (uri) {
     log('Usage: add <magnet uri>')
     return
   }
-
   socket.emit('add', uri)
+}
+
+function removeTorrent (torrentId) {
+  if (!torrentId) {
+    log('Usage: remove <torrent id>')
+    return
+  }
+  socket.emit('remove', torrentId)
 }
 
 function listTorrents () {
@@ -35,6 +42,8 @@ function getInput () {
     const args = answer.split(' ')
     if (args[0] === 'add') {
       addTorrent(args[1])
+    } else if (args[0] === 'remove') {
+      removeTorrent(args[1])
     } else if (args[0] === 'list') {
       listTorrents()
     } else {
