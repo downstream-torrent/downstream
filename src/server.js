@@ -12,11 +12,15 @@ export const client = new WebTorrent()
 
 app.listen(config.get('port') || 3000)
 
-client.on('torrent', (torrent) => io.sockets.emit('torrentAdded', {
+client.on('torrent', torrent => io.sockets.emit('torrentAdded', {
   hash: torrent.infoHash,
   magnet: torrent.magnetURI,
   path: torrent.path
 }))
+
+client.on('error', err => {
+  console.log('Client Error:', err.message)
+})
 
 io.on('connection', (socket) => {
   console.log('Connection established!')
@@ -29,3 +33,4 @@ io.on('connection', (socket) => {
 
 // Scan feeds for new torrents
 scanFeeds()
+setInterval(scanFeeds, 3600000)

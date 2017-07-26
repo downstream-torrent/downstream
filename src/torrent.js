@@ -4,7 +4,14 @@ import path from 'path'
 import { client, io } from './server'
 
 export function addTorrent (uri) {
+  if (client.get(uri)) {
+    console.log(`Torrent ${uri} has already been added`)
+    return
+  }
+
   client.add(uri, { path: config.get('paths.downloading') }, torrent => {
+    console.log(`Added torrent ${torrent.infoHash}`)
+
     // Send the progress of the torrent to all clients when data is downloaded.
     torrent.on('download', () => io.sockets.emit('torrentDownload', {
       downloadSpeed: torrent.downloadSpeed,
@@ -44,6 +51,8 @@ export function removeTorrent (torrentId) {
       console.log(`[Torrent ${torrentId}] Error removing torrent:`, err.message)
       return
     }
+
+    console.log(`Removed torrent ${torrentId}`)
     io.sockets.emit('remove', torrentId)
   })
 }
