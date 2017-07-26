@@ -1,9 +1,34 @@
 # Downstream
+[![Build Status](https://travis-ci.org/nerdenough/downstream.svg?branch=master)](https://travis-ci.org/nerdenough/downstream)
+
 [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
 
 Downstream is a torrent client built on top of `webtorrent`. It provides an
 easy way to add torrents, either manually via torrent urls and magnet links,
 or automated through RSS feeds.
+
+## Usage
+### Requirements
+- macOS or Linux
+- [Node.js](https://nodejs.org) (>= 6)
+
+### Installing and Running
+1. Clone (or download) this repository to your local machine.
+2. Open your terminal in the root of the Downstream directory and run `npm install`
+to install the dependencies.
+3. Customise your config (see the config section below)
+4. Run Downstream using `npm start`
+
+## Command Line
+You can use the Downstream command line by running `./bin/downstream`. This will
+automatically connect to the Downstream service if it is running and allows you to
+manually manage torrents being downloaded by Downstream.
+
+### Commands
+- `add <magnet|torrent>` - Adds the magnet uri or torrent url and begins downloading
+- `remove <torrent id>` - Removes the torrent matching the specified id
+- `list` - Shows the status, id, progress, and other information for each torrent added
+to Downstream
 
 ## Config
 Downstream's settings can be configured using the `config/default.json` file.
