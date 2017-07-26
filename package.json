@@ -4,7 +4,8 @@
   "description": "A useful torrent client",
   "main": "src/server.js",
   "scripts": {
-    "start": "babel-node ."
+    "start": "babel-node .",
+    "test": "gulp eslint && gulp mocha"
   },
   "author": "Brendan Goodenough <brendan@goodenough.nz>",
   "license": "MIT",
@@ -21,11 +22,16 @@
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-preset-env": "^1.6.0",
+    "chai": "^4.1.0",
     "eslint": "^4.3.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-node": "^5.1.1",
     "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^4.0.0",
+    "gulp-mocha": "^4.3.1",
+    "sinon": "^2.4.0"
   }
 }

@@ -4,25 +4,27 @@ import request from 'request'
 
 import { addTorrent } from './torrent'
 
-const feeds = config.get('feeds')
+export function checkMatch (feed, item) {
+  let regex
+  if (typeof feed.match === 'object') {
+    if (feed.match.flags) {
+      regex = new RegExp(feed.match.pattern, feed.match.flags)
+    } else {
+      regex = new RegExp(feed.match.pattern)
+    }
+  } else {
+    regex = new RegExp(feed.match)
+  }
+
+  return regex.test(item.title)
+}
 
 export function scanFeeds () {
+  const feeds = config.get('feeds')
   console.log(`Scanning ${feeds.length} feeds`)
+
   feeds.forEach(feed => {
     const feedParser = new FeedParser()
-    let regex
-
-    if (feed.match) {
-      if (typeof feed.match === 'object') {
-        if (feed.match.flags) {
-          regex = new RegExp(feed.match.pattern, feed.match.flags)
-        } else {
-          regex = new RegExp(feed.match.pattern)
-        }
-      } else {
-        regex = new RegExp(feed.match)
-      }
-    }
 
     feedParser.on('error', err => {
       console.log('Error parsing feed', err)
@@ -31,7 +33,7 @@ export function scanFeeds () {
     feedParser.on('readable', () => {
       let item
       while ((item = feedParser.read())) {
-        if (feed.match && !regex.test(item.title)) {
+        if (feed.match && !checkMatch(feed, item)) {
           return
         }
 

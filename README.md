@@ -1,4 +1,6 @@
 # Downstream
+[![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
+
 Downstream is a torrent client built on top of `webtorrent`. It provides an
 easy way to add torrents, either manually via torrent urls and magnet links,
 or automated through RSS feeds.
