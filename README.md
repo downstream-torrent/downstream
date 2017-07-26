@@ -1,5 +1,5 @@
 # Downstream
-[![Build Status](https://travis-ci.org/nerdenough/downstream.svg?branch=master)](https://travis-ci.org/nerdenough/downstream)
+[![Build Status](https://travis-ci.org/downstream-torrent/downstream.svg?branch=master)](https://travis-ci.org/downstream-torrent/downstream)
 
 [![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
 
