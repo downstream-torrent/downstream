@@ -115,5 +115,5 @@ export function resumeTorrent (torrentId) {
 
 export function listTorrents (socket) {
   const torrents = db.get('torrents').value()
-  socket.emit('list', torrents)
+  socket.emit('torrent_list', torrents)
 }

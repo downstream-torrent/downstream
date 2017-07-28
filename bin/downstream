@@ -35,9 +35,9 @@ function connect (command, args) {
         const downloadSpeed = bytes(torrent.downloadSpeed)
         const uploadSpeed = bytes(torrent.uploadSpeed)
         const timeRemaining = moment.utc(torrent.timeRemaining).format('HH:mm:ss')
-        console.log(`${torrent.name} (${bytes(torrent.length)})`)
-        console.log(`${progress}% complete, ${downloadSpeed}/s down, ${uploadSpeed}/s up, ${timeRemaining} remaining`)
+        console.log(`${torrent.name} (${bytes(torrent.length)}) ${progress}% complete, ${downloadSpeed}/s down, ${uploadSpeed}/s up, ${timeRemaining} remaining`)
       })
+      process.exit()
     })
   }
 
@@ -54,6 +54,8 @@ if (args[2] === 'add') {
     process.exit()
   }
   connect('add', { id: args[3] }).then(socket => socket.emit('add_torrent', args[3]))
+} else if (args[2] === 'list') {
+  connect('list').then(socket => socket.emit('list_torrents'))
 } else {
   console.log('Downstream Command Line Interface')
   console.log()
