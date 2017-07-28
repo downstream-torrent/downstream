@@ -16,14 +16,26 @@ function connect (command, args) {
     process.exit()
   })
 
-  socket.on('torrent_add_error', err => {
-    console.log(err)
-    process.exit()
-  })
-
   if (command === 'add') {
     socket.on('torrent_added_reply', torrent => {
       console.log(`Successfully added "${torrent.name}"`)
+      process.exit()
+    })
+
+    socket.on('torrent_add_error', err => {
+      console.log(err)
+      process.exit()
+    })
+  }
+
+  if (command === 'remove') {
+    socket.on('torrent_removed_reply', torrent => {
+      console.log(`Successfully removed "${torrent.name}"`)
+      process.exit()
+    })
+
+    socket.on('torrent_remove_error', err => {
+      console.log(err)
       process.exit()
     })
   }
@@ -54,6 +66,12 @@ if (args[2] === 'add') {
     process.exit()
   }
   connect('add', { id: args[3] }).then(socket => socket.emit('add_torrent', args[3]))
+} else if (args[2] === 'remove') {
+  if (!args[3]) {
+    console.log('Usage: remove <magnet uri|torrent link>')
+    process.exit()
+  }
+  connect('remove', { id: args[3] }).then(socket => socket.emit('remove_torrent', args[3]))
 } else if (args[2] === 'list') {
   connect('list').then(socket => socket.emit('list_torrents'))
 } else {

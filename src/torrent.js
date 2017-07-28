@@ -81,7 +81,7 @@ export async function onTorrent (torrent, socket = null) {
 }
 
 export function addTorrent (id, socket = null) {
-  if (client && client.get(id)) {
+  if (client.get(id)) {
     if (socket) {
       socket.emit('torrent_add_error', 'Error: Torrent has already been added')
     }
@@ -91,15 +91,23 @@ export function addTorrent (id, socket = null) {
   client.add(id, { path: config.get('paths.downloading') }, torrent => onTorrent(torrent, socket))
 }
 
-export function removeTorrent (torrentId) {
-  client.remove(torrentId, err => {
+export function removeTorrent (id, socket) {
+  const torrent = client.get(id)
+  if (!torrent) {
+    socket.emit('torrent_remove_error', 'Error: Torrent does not exist')
+    return
+  }
+  const torrentInfo = db.get('torrents').find({ infoHash: torrent.infoHash }).value()
+
+  client.remove(id, async err => {
     if (err) {
-      console.log(`[Torrent ${torrentId}] Error removing torrent:`, err.message)
+      socket.emit('torrent_remove_error', err)
       return
     }
 
-    console.log(`Removed torrent ${torrentId}`)
-    io.sockets.emit('torrent_removed', torrentId)
+    await db.get('torrents').remove({ infoHash: torrent.infoHash }).write()
+    socket.broadcast.emit('torrent_removed', torrentInfo)
+    socket.emit('torrent_removed_reply', torrentInfo)
   })
 }
 

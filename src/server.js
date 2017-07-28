@@ -21,8 +21,8 @@ export function start () {
 
   io.on('connection', async socket => {
     console.log('Connection established!')
-    socket.on('add_torrent', uri => addTorrent(uri, socket))
-    socket.on('remove_torrent', torrentId => removeTorrent(torrentId))
+    socket.on('add_torrent', id => addTorrent(id, socket))
+    socket.on('remove_torrent', id => removeTorrent(id, socket))
     socket.on('pause', torrentId => pauseTorrent(torrentId))
     socket.on('resume', torrentId => resumeTorrent(torrentId))
     socket.on('list_torrents', () => listTorrents(socket))
