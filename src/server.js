@@ -9,28 +9,30 @@ import { addTorrent, removeTorrent, pauseTorrent, resumeTorrent, listTorrents } 
 
 export const app = http.createServer()
 export const io = socket(app)
+export const db = low('db.json', { storage: fileAsync })
 export const client = new WebTorrent()
 
-app.listen(config.get('port') || 3000)
+export function start () {
+  app.listen(config.get('port') || 9001)
 
-// Set up the database and load initial torrents
-export const db = low('db.json', { storage: fileAsync })
-db.defaults({ torrents: [] }).write()
-db.get('torrents').map('infoHash').value().forEach(infoHash => addTorrent(infoHash))
+  // Set up the database and load initial torrents
+  db.defaults({ torrents: [] }).write()
+  db.get('torrents').map('infoHash').value().forEach(infoHash => addTorrent(infoHash))
 
-io.on('connection', async socket => {
-  console.log('Connection established!')
-  socket.on('add_torrent', uri => addTorrent(uri, socket))
-  socket.on('remove_torrent', torrentId => removeTorrent(torrentId))
-  socket.on('pause', torrentId => pauseTorrent(torrentId))
-  socket.on('resume', torrentId => resumeTorrent(torrentId))
-  socket.on('list_torrents', () => listTorrents(socket))
-})
+  io.on('connection', async socket => {
+    console.log('Connection established!')
+    socket.on('add_torrent', uri => addTorrent(uri, socket))
+    socket.on('remove_torrent', torrentId => removeTorrent(torrentId))
+    socket.on('pause', torrentId => pauseTorrent(torrentId))
+    socket.on('resume', torrentId => resumeTorrent(torrentId))
+    socket.on('list_torrents', () => listTorrents(socket))
+  })
 
-client.on('error', err => {
-  console.log('Client Error:', err.message)
-})
+  client.on('error', err => {
+    console.log('Client Error:', err.message)
+  })
 
-// Scan feeds for new torrents
-scanFeeds()
-setInterval(scanFeeds, 3600000)
+  // Scan feeds for new torrents
+  scanFeeds()
+  setInterval(scanFeeds, 3600000)
+}

@@ -81,7 +81,7 @@ export async function onTorrent (torrent, socket = null) {
 }
 
 export function addTorrent (id, socket = null) {
-  if (client.get(id)) {
+  if (client && client.get(id)) {
     if (socket) {
       socket.emit('torrent_add_error', 'Error: Torrent has already been added')
     }
