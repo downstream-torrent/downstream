@@ -1,7 +1,7 @@
 import config from 'config'
 import mv from 'mv'
 import path from 'path'
-import { client, io } from './server'
+import { client, db, io } from './server'
 
 export function addTorrent (uri) {
   if (client.get(uri)) {
@@ -13,14 +13,20 @@ export function addTorrent (uri) {
     console.log(`Added torrent ${torrent.infoHash}`)
 
     // Send the progress of the torrent to all clients when data is downloaded.
-    torrent.on('download', () => io.sockets.emit('torrentDownload', {
-      downloadSpeed: torrent.downloadSpeed,
-      infoHash: torrent.infoHash,
-      magnetUri: torrent.magnetURI,
-      path: torrent.path,
-      progress: torrent.progress,
-      uploadSpeed: torrent.uploadSpeed
-    }))
+    torrent.on('download', async () => {
+      const torrentInfo = {
+        downloaded: torrent.downloaded,
+        downloadSpeed: torrent.downloadSpeed,
+        uploaded: torrent.uploaded,
+        uploadSpeed: torrent.uploadSpeed,
+        progress: torrent.progress,
+        ratio: torrent.ratio,
+        numPeers: torrent.numPeers,
+        timeRemaining: torrent.timeRemaining
+      }
+      await db.get('torrents').find({ infoHash: torrent.infoHash }).assign(torrentInfo).write()
+      io.sockets.emit('torrentDownload', torrentInfo)
+    })
 
     // Move files to the completed directory once a torrent is complete. If the downloading
     // and complete directories are the same the files will not be moved.
@@ -68,20 +74,6 @@ export function resumeTorrent (torrentId) {
 }
 
 export function listTorrents (socket) {
-  const torrents = client.torrents.map(torrent => ({
-    hash: torrent.infoHash,
-    magnet: torrent.magnetURI,
-    timeRemaining: torrent.timeRemaining,
-    received: torrent.received,
-    downloaded: torrent.downloaded,
-    uploaded: torrent.downloaded,
-    downloadSpeed: torrent.downloadSpeed,
-    uploadSpeed: torrent.uploadSpeed,
-    progress: torrent.progress,
-    ratio: torrent.ratio,
-    peers: torrent.numPeers,
-    path: torrent.path
-  }))
-
+  const torrents = db.get('torrents').value()
   socket.emit('list', torrents)
 }

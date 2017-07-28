@@ -2,6 +2,7 @@
 
 const bytes = require('bytes')
 const config = require('config')
+const moment = require('moment')
 const readline = require('readline')
 const io = require('socket.io-client')
 
@@ -84,13 +85,12 @@ socket.on('disconnect', () => {
 })
 
 socket.on('list', torrents => {
-  log('STATUS\tID\tDL SPEED\tUL SPEED\tDOWNLOADED\tPROGRESS\tRATIO\tPATH')
   torrents.forEach(torrent => {
-    const downloadSpeed = `${bytes(torrent.downloadSpeed)}/s`
-    const uploadSpeed = `${bytes(torrent.uploadSpeed)}/s`
-    const downloaded = bytes(torrent.downloaded)
+    log(`${torrent.name} (${bytes(torrent.length)})`)
     const progress = (torrent.progress * 100).toFixed(2)
-    const status = torrent.peers > 0 ? 'DOWNLOADING' : 'STALLED'
-    console.log(`${status}\t${torrent.hash}\t${downloadSpeed}\t${uploadSpeed}\t${downloaded}\t${progress}%\t${torrent.ratio}\t${torrent.path}`)
+    const downloadSpeed = bytes(torrent.downloadSpeed)
+    const uploadSpeed = bytes(torrent.uploadSpeed)
+    const timeRemaining = moment.utc(torrent.timeRemaining).format('HH:mm:ss')
+    console.log(`${progress}% complete, ${downloadSpeed}/s down, ${uploadSpeed}/s up, ${timeRemaining} remaining`)
   })
 })

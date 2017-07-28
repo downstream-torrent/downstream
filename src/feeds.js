@@ -21,6 +21,10 @@ export function checkMatch (feed, item) {
 
 export function scanFeeds () {
   const feeds = config.get('feeds')
+  if (!feeds || !feeds.length) {
+    return
+  }
+
   console.log(`Scanning ${feeds.length} feeds`)
 
   feeds.forEach(feed => {
