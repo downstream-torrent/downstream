@@ -17,6 +17,7 @@ export function getTorrentInfo (torrent) {
     progress: torrent.progress,
     ratio: torrent.ratio,
     numPeers: torrent.numPeers,
+    status: 'unknown',
     timeRemaining: torrent.timeRemaining,
     files: torrent.files.map(file => ({
       name: file.name,
@@ -38,6 +39,8 @@ export async function onDownload (torrent) {
   torrentInfo.queuePosition = db.get('torrents').find({ infoHash: torrent.infoHash }).value().queuePosition
 
   if (torrent.progress === 1) {
+    torrentInfo.status = 'complete'
+  } else if (torrent.downloadSpeed > 0) {
     torrentInfo.status = 'downloading'
   }
 
@@ -71,6 +74,8 @@ export async function onUpload (torrent) {
  * @param {object} torrent - the torrent that has just completed
  */
 export async function onDone (torrent) {
+  await db.get('torrents').find({ infoHash: torrent.infoHash }).assign({ status: 'done' }).write()
+
   const downloadPath = config.get('paths.downloading')
   const completePath = config.get('paths.complete')
   if (completePath && completePath !== downloadPath) {
@@ -91,6 +96,16 @@ export async function onDone (torrent) {
   })
   await torrentEntry.write()
   io.sockets.emit('torrent_complete', torrentEntry.value())
+}
+
+export async function onNoPeers (torrent) {
+  const currentStatus = db.get('torrents').find({ infoHash: torrent.infoHash }).value()
+  if (currentStatus !== 'paused') {
+    await db.get('torrents').find({ infoHash: torrent.infoHash }).assign({ status: 'stalled' }).write()
+  }
+
+  const torrentEntry = db.get('torrents').find({ infoHash: torrent.infoHash }).value()
+  io.sockets.emit('torrent_stalled', torrentEntry)
 }
 
 export async function onTorrent (torrent, socket = null) {
@@ -116,6 +131,7 @@ export async function onTorrent (torrent, socket = null) {
   torrent.on('done', () => onDone(torrent))
   torrent.on('warning', err => console.log('Torrent Warning:', err.message))
   torrent.on('error', err => console.log('Torrent Error:', err.message))
+  torrent.on('noPeers', () => onNoPeers(torrent))
 }
 
 export function addTorrent (id, socket = null) {
