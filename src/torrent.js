@@ -3,14 +3,13 @@ import mv from 'mv'
 import path from 'path'
 import { client, db, io } from './server'
 
-/**
- * Updates the database and notify all clients whenever data is downloaded for
- * a torrent.
- *
- * @param {object} torrent - the torrent with newly downloaded data
- */
-export async function onDownload (torrent) {
-  const torrentInfo = {
+export function getTorrentInfo (torrent) {
+  return {
+    infoHash: torrent.infoHash,
+    length: torrent.length,
+    magnet: torrent.magnetURI,
+    name: torrent.name,
+    path: torrent.path,
     downloaded: torrent.downloaded,
     downloadSpeed: torrent.downloadSpeed,
     uploaded: torrent.uploaded,
@@ -18,10 +17,50 @@ export async function onDownload (torrent) {
     progress: torrent.progress,
     ratio: torrent.ratio,
     numPeers: torrent.numPeers,
-    timeRemaining: torrent.timeRemaining
+    timeRemaining: torrent.timeRemaining,
+    files: torrent.files.map(file => ({
+      name: file.name,
+      path: file.path,
+      length: file.length,
+      progress: file.progress
+    }))
   }
+}
+
+/**
+ * Updates the database and notify all clients whenever data is downloaded for
+ * a torrent.
+ *
+ * @param {object} torrent - the torrent with newly downloaded data
+ */
+export async function onDownload (torrent) {
+  const torrentInfo = getTorrentInfo(torrent)
+  torrentInfo.queuePosition = db.get('torrents').find({ infoHash: torrent.infoHash }).value().queuePosition
+
+  if (torrent.progress === 1) {
+    torrentInfo.status = 'downloading'
+  }
+
   await db.get('torrents').find({ infoHash: torrent.infoHash }).assign(torrentInfo).write()
   io.sockets.emit('torrent_download', torrentInfo)
+}
+
+/**
+ * Updates the database and notify all clients whenever data is uploaded for
+ * a torrent.
+ *
+ * @param {object} torrent - the torrent with newly uploaded data
+ */
+export async function onUpload (torrent) {
+  const torrentInfo = getTorrentInfo(torrent)
+  torrentInfo.queuePosition = db.get('torrents').find({ infoHash: torrent.infoHash }).value().queuePosition
+
+  if (torrent.uploadSpeed > 0 && torrent.downloadSpeed === 0) {
+    torrentInfo.status = 'seeding'
+  }
+
+  await db.get('torrents').find({ infoHash: torrent.infoHash }).assign(torrentInfo).write()
+  io.sockets.emit('torrent_upload', torrentInfo)
 }
 
 /**
@@ -55,15 +94,11 @@ export async function onDone (torrent) {
 }
 
 export async function onTorrent (torrent, socket = null) {
-  const torrentInfo = {
-    infoHash: torrent.infoHash,
-    length: torrent.length,
-    magnet: torrent.magnetURI,
-    name: torrent.name,
-    path: torrent.path
-  }
+  const torrentInfo = getTorrentInfo(torrent)
 
-  if (!db.get('torrents').filter({ infoHash: torrent.infoHash }).size().value()) {
+  if (!db.get('torrents').find({ infoHash: torrent.infoHash }).value()) {
+    const numTorrents = db.get('torrents').size().value()
+    torrentInfo.queuePosition = numTorrents + 1
     await db.get('torrents').push(torrentInfo).write()
   } else {
     await db.get('torrents').find({ infoHash: torrent.infoHash }).assign(torrentInfo).write()
@@ -77,7 +112,10 @@ export async function onTorrent (torrent, socket = null) {
   }
 
   torrent.on('download', () => onDownload(torrent))
+  torrent.on('upload', () => onUpload(torrent))
   torrent.on('done', () => onDone(torrent))
+  torrent.on('warning', err => console.log('Torrent Warning:', err.message))
+  torrent.on('error', err => console.log('Torrent Error:', err.message))
 }
 
 export function addTorrent (id, socket = null) {

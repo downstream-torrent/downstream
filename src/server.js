@@ -12,15 +12,14 @@ export const io = socket(app)
 export const db = low('db.json', { storage: fileAsync })
 export const client = new WebTorrent()
 
-export function start () {
+export async function start () {
   app.listen(config.get('port') || 9001)
 
   // Set up the database and load initial torrents
-  db.defaults({ torrents: [] }).write()
+  await db.defaults({ torrents: [] }).write()
   db.get('torrents').map('infoHash').value().forEach(infoHash => addTorrent(infoHash))
 
-  io.on('connection', async socket => {
-    console.log('Connection established!')
+  io.on('connection', socket => {
     socket.on('add_torrent', id => addTorrent(id, socket))
     socket.on('remove_torrent', id => removeTorrent(id, socket))
     socket.on('pause', torrentId => pauseTorrent(torrentId))
