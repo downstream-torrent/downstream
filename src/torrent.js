@@ -107,11 +107,10 @@ export async function onTorrent (torrent, socket = null) {
   }
 
   if (socket) {
-    socket.broadcast.emit('torrent_added', torrentInfo)
     socket.emit('torrent_added_reply', torrentInfo)
-  } else {
-    io.sockets.emit('torrent_added', torrentInfo)
   }
+
+  io.sockets.emit('torrent_added', torrentInfo)
 
   torrent.on('done', () => onDone(torrent))
   torrent.on('warning', err => console.log('Torrent Warning:', err.message))
