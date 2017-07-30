@@ -1,6 +1,6 @@
 {
   "name": "downstream-torrent",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A useful torrent client",
   "main": "src/index.js",
   "bin": {
