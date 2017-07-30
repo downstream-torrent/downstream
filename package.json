@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "A useful torrent client",
   "main": "src/index.js",
+  "bin": {
+    "downstream": "bin/downstream"
+  },
   "scripts": {
     "start": "babel-node .",
     "test": "gulp eslint && gulp mocha"
