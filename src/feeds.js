@@ -1,4 +1,4 @@
-import config from 'config'
+import config from '../config'
 import FeedParser from 'feedparser'
 import request from 'request'
 

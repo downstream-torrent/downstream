@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const bytes = require('bytes')
-const config = require('config')
+const config = require('../config')
 const moment = require('moment')
 const io = require('socket.io-client')
 

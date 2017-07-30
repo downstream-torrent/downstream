@@ -1,4 +1,4 @@
-import config from 'config'
+import config from '../config'
 import http from 'http'
 import low, { fileAsync } from 'lowdb'
 import socket from 'socket.io'

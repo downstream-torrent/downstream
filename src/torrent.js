@@ -1,4 +1,4 @@
-import config from 'config'
+import config from '../config'
 import mv from 'mv'
 import path from 'path'
 import { client, db, io } from './server'

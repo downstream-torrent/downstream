@@ -1,9 +1,0 @@
-{
-  "port": 9001,
-  "paths": {
-    "downloading": "/tmp/webtorrent",
-    "complete": "/tmp/webtorrent"
-  },
-  "feeds": [],
-  "debug": false
-}
